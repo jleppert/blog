@@ -1,0 +1,271 @@
+<html>
+<head>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r73/three.min.js"></script>
+  <script id="vertexShader" type="x-shader/x-vertex">
+    precision highp float;
+    attribute vec2 vertex;
+    varying vec2 oTexCoord;
+    void main() {
+      oTexCoord = 0.5 + vec2(0.5, -0.5) * vertex;
+      gl_Position = vec4(vertex, 0.0, 1.0);
+    }
+  </script>
+  <script id="fragmentShader" type="x-shader/x-fragment">
+  precision highp float;
+  varying vec2 oTexCoord;
+  // Values that were scattered throughout the Oculus world demo
+  const vec4 HmdWarpParam = vec4(1.0, 0.22, 0.24, 0.0); // For the 7-inch device
+  const vec4 ChromAbParam = vec4(0.996, -0.004, 1.014, 0.0);
+  const float HMD_HResolution = 1280.0;
+  const float HMD_VResolution = 800.0;
+  const float HMD_HScreenSize = 0.14976;
+  const float HMD_VScreenSize = HMD_HScreenSize / (HMD_HResolution / HMD_VResolution);
+  const float HMD_InterpupillaryDistance = 0.064;
+  const float HMD_LensSeparationDistance = 0.0635;
+  const float HMD_EyeToScreenDistance = 0.041;
+  const float lensOffset = HMD_LensSeparationDistance * 0.5;
+  const float lensShift = HMD_HScreenSize * 0.25 - lensOffset;
+  const float Distortion_XCenterOffset = 4.0 * lensShift / HMD_HScreenSize;
+  const float DistortionFitX = -1.0;
+  const float DistortionFitY = 0.0;
+  const float stereoAspect = 0.5 * HMD_HResolution / HMD_VResolution;
+  const float dx = DistortionFitX - Distortion_XCenterOffset;
+  const float dy = DistortionFitY / stereoAspect;
+  const float fitRadiusSquared = dx * dx + dy * dy;
+  const float Distortion_Scale =
+  HmdWarpParam.x +
+  HmdWarpParam.y * fitRadiusSquared +
+  HmdWarpParam.z * fitRadiusSquared * fitRadiusSquared +
+  HmdWarpParam.w * fitRadiusSquared * fitRadiusSquared * fitRadiusSquared;
+  // This samples from a single unwarped [0,0]x[1,1] box containing two views
+  // side-by-side that have been rendered using normal perspective projection.
+  // The left eye takes up [0,0]x[0.5,1] and the right eye takes up [0.5,0]x[1,1].
+  vec4 sample(vec2 point, vec2 ScreenCenter) {
+    if (clamp(point, ScreenCenter - vec2(0.25, 0.5), ScreenCenter + vec2(0.25, 0.5)) != point) return vec4(0.0);
+    vec2 checkerboard = fract(point * vec2(4.0, 2.0)) - 0.5;
+    return vec4(checkerboard.x * checkerboard.y < 0.0 ? 0.25 : 1.0);
+  }
+void main() {
+  // Compute the viewport size
+  bool isRight = oTexCoord.x > 0.5;
+  float x = isRight ? 0.5 : 0.0;
+  float y = 0.0;
+  float w = 0.5;
+  float h = 1.0;
+  // Set up values for the shader
+  float XCenterOffset = isRight ? -Distortion_XCenterOffset : Distortion_XCenterOffset;
+  vec2 LensCenter = vec2(x + (w + XCenterOffset * 0.5) * 0.5, y + h * 0.5);
+  vec2 ScreenCenter = vec2(x + w * 0.5, y + h * 0.5);
+  float scaleFactor = 1.0 / Distortion_Scale;
+  vec2 Scale = vec2(w * 0.5 * scaleFactor, h * 0.5 * scaleFactor * stereoAspect);
+  vec2 ScaleIn = vec2(2.0 / w, 2.0 / h / stereoAspect);
+  // Compute the warp
+  vec2 theta = (oTexCoord - LensCenter) * ScaleIn; // Scales to [-1, 1]
+  float rSq = theta.x * theta.x + theta.y * theta.y;
+  vec2 theta1 = theta * (
+      HmdWarpParam.x +
+      HmdWarpParam.y * rSq +
+      HmdWarpParam.z * rSq * rSq +
+      HmdWarpParam.w * rSq * rSq * rSq);
+  // Compute chromatic aberration
+  vec2 thetaRed = theta1 * (ChromAbParam.x + ChromAbParam.y * rSq);
+  vec2 thetaBlue = theta1 * (ChromAbParam.z + ChromAbParam.w * rSq);
+  vec2 tcRed = LensCenter + Scale * thetaRed;
+  vec2 tcGreen = LensCenter + Scale * theta1;
+  vec2 tcBlue = LensCenter + Scale * thetaBlue;
+  // Apply chromatic aberration
+  gl_FragColor = vec4(
+      sample(tcRed, ScreenCenter).r,
+      sample(tcGreen, ScreenCenter).g,
+      sample(tcBlue, ScreenCenter).b,
+      1.0);
+  // Visualize the unwarped data
+    gl_FragColor = sample(oTexCoord, ScreenCenter);
+}
+
+  </script> 
+  <script id="fragmentShader2" type="x-shader/x-fragment">
+    const vec4 HmdWarpParam = vec4(1.0, 0.22, 0.24, 0.0); // For the 7-inch device
+    const vec4 ChromAbParam = vec4(0.996, -0.004, 1.014, 0.0);
+    const float HMD_HResolution = 1280.0;
+    const float HMD_VResolution = 800.0;
+    const float HMD_HScreenSize = 0.14976;
+    const float HMD_VScreenSize = HMD_HScreenSize / (HMD_HResolution / HMD_VResolution);
+    const float HMD_InterpupillaryDistance = 0.064;
+    const float HMD_LensSeparationDistance = 0.0635;
+    const float HMD_EyeToScreenDistance = 0.041;
+    const float lensOffset = HMD_LensSeparationDistance * 0.5;
+    const float lensShift = HMD_HScreenSize * 0.25 - lensOffset;
+    const float Distortion_XCenterOffset = 4.0 * lensShift / HMD_HScreenSize;
+    const float DistortionFitX = -1.0;
+    const float DistortionFitY = 0.0;
+    const float stereoAspect = 0.5 * HMD_HResolution / HMD_VResolution;
+    const float dx = DistortionFitX - Distortion_XCenterOffset;
+    const float dy = DistortionFitY / stereoAspect;
+    const float fitRadiusSquared = dx * dx + dy * dy;
+    const float Distortion_Scale =
+      HmdWarpParam.x +
+        HmdWarpParam.y * fitRadiusSquared +
+          HmdWarpParam.z * fitRadiusSquared * fitRadiusSquared +
+            HmdWarpParam.w * fitRadiusSquared * fitRadiusSquared * fitRadiusSquared;
+
+    vec4 sample(vec2 point, vec2 ScreenCenter) {
+      if (clamp(point, ScreenCenter - vec2(0.25, 0.5), ScreenCenter + vec2(0.25, 0.5)) != point) return vec4(0.0);
+      vec2 checkerboard = fract(point * vec2(4.0, 2.0)) - 0.5;
+      return vec4(checkerboard.x * checkerboard.y < 0.0 ? 0.25 : 1.0);
+    }
+
+
+    precision highp float;
+    uniform float barrel_power;
+
+    vec2 distort2(vec2 uv) {
+      uv = vec2((mod(uv.x,1.0)-0.5)*2.0+0.2*sign(uv.x), uv.y);
+      vec2 ScaleIn = vec2(1.0);
+      vec2 LensCenter = vec2(0.0,0.0);
+      vec4 HmdWarpParam = vec4(1.0,0.22, 0.240, 0.00);
+      vec2 Scale = vec2(1.0);
+
+      vec2 theta  = (uv - LensCenter) * ScaleIn;
+      float  rSq    = theta.x * theta.x + theta.y * theta.y;
+      vec2 rvector= theta * (HmdWarpParam.x + HmdWarpParam.y * rSq
+                 + HmdWarpParam.z * rSq * rSq
+                 + HmdWarpParam.w * rSq * rSq * rSq);
+      return LensCenter + Scale * rvector;
+    }
+
+    vec2 distort(vec2 p) {
+      float theta  = atan(p.y, p.x);
+      float radius = length(p);
+      radius = pow(radius, barrel_power);
+      p.x = radius * cos(theta);
+      p.y = radius * sin(theta);
+      return 0.5 * (p + 1.0);
+    }
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+
+  vec2 oTexCoord = fragCoord.xy / iResolution.xy;
+
+  // Compute the viewport size
+  bool isRight = oTexCoord.x > 0.5;
+  float x = isRight ? 0.5 : 0.0;
+  float y = 0.0;
+  float w = 0.5;
+  float h = 1.0;
+  // Set up values for the shader
+  float XCenterOffset = isRight ? -Distortion_XCenterOffset : Distortion_XCenterOffset;
+  vec2 LensCenter = vec2(x + (w + XCenterOffset * 0.5) * 0.5, y + h * 0.5);
+  vec2 ScreenCenter = vec2(x + w * 0.5, y + h * 0.5);
+  float scaleFactor = 1.0 / Distortion_Scale;
+  vec2 Scale = vec2(w * 0.5 * scaleFactor, h * 0.5 * scaleFactor * stereoAspect);
+  vec2 ScaleIn = vec2(2.0 / w, 2.0 / h / stereoAspect);
+  // Compute the warp
+  vec2 theta = (oTexCoord - LensCenter) * ScaleIn; // Scales to [-1, 1]
+  float rSq = theta.x * theta.x + theta.y * theta.y;
+  vec2 theta1 = theta * (
+      HmdWarpParam.x +
+      HmdWarpParam.y * rSq +
+      HmdWarpParam.z * rSq * rSq +
+      HmdWarpParam.w * rSq * rSq * rSq);
+  // Compute chromatic aberration
+  vec2 thetaRed = theta1 * (ChromAbParam.x + ChromAbParam.y * rSq);
+  vec2 thetaBlue = theta1 * (ChromAbParam.z + ChromAbParam.w * rSq);
+  vec2 tcRed = LensCenter + Scale * thetaRed;
+  vec2 tcGreen = LensCenter + Scale * theta1;
+  vec2 tcBlue = LensCenter + Scale * thetaBlue;
+  // Apply chromatic aberration
+  fragColor = vec4(
+      sample(tcRed, ScreenCenter).r,
+      sample(tcGreen, ScreenCenter).g,
+      sample(tcBlue, ScreenCenter).b,
+      1.0);
+  // Visualize the unwarped data
+  // fragColor = sample(oTexCoord, ScreenCenter);
+}
+    varying vec2 v_pos;
+    uniform sampler2D video;
+    void main() {
+      vec2 d = distort2(v_pos.xy);
+      if (d.x > 1.0 || d.x < 0.0 || d.y > 1.0 || d.y < 0.0) {
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+      } else {
+        gl_FragColor = texture2D(video, d);
+      }
+    }
+  </script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 0px;
+    }
+    video {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<video id="video" loop autoplay muted>
+  <source src="/demos/big_buck_bunny.mp4" type="video/mp4">
+</video>
+</body>
+<script>
+var camera = new THREE.PerspectiveCamera(0, 0, 1, 10000);
+camera.position.z = 0;
+
+var scene = new THREE.Scene();
+
+var canvas  = document.createElement('canvas');
+canvas.width = 640;
+canvas.height = 360;
+
+var texture = new THREE.Texture(canvas);
+
+texture.magFilter = THREE.LinearFilter;
+texture.minFilter = THREE.LinearFilter;
+texture.format = THREE.RGBFormat;
+
+var vertShader = document.getElementById('vertexShader').innerHTML;
+var fragShader = document.getElementById('fragmentShader').innerHTML;
+
+var material = new THREE.ShaderMaterial({
+  uniforms: {
+    video: {
+      type: 't',
+      value: texture
+    },
+    barrel_power: {
+      type: 'f',
+      value: 1.5
+    }
+  },
+  vertexShader: vertShader,
+  fragmentShader: fragShader,
+  wireframe: false
+});
+
+var plane  = new THREE.PlaneGeometry(640, 360, 4, 4);
+var mesh   = new THREE.Mesh(plane, material);
+
+scene.add(mesh);
+
+var renderer = new THREE.WebGLRenderer();
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(640, 360);
+document.body.appendChild(renderer.domElement);
+
+var video = document.getElementById('video');
+var ctx = canvas.getContext('2d');
+
+function render() {
+ texture.needsUpdate = true;
+ ctx.drawImage(video, 0, 0, 640, 360);
+ renderer.render(scene, camera);
+ requestAnimationFrame(render);
+}
+
+video.addEventListener('play', function() {
+  render();
+});
+</script>
+</html>

@@ -1,0 +1,99 @@
+<html>
+<head>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r73/three.min.js"></script>
+  <script id="vertexShader" type="x-shader/x-vertex">
+    varying vec2 v_pos;
+    
+    void main() {
+      v_pos = vec2(position.xy);
+      gl_Position = vec4(position,1.0);
+    }
+  </script>
+  <script id="fragmentShader" type="x-shader/x-fragment">
+    varying vec2 v_pos;
+    uniform sampler2D video;
+
+    void main() {
+      gl_FragColor = texture2D(video, v_pos);
+    }
+  </script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 0px;
+    }
+    video {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<video id="video" loop autoplay muted>
+  <source src="/demos/big_buck_bunny.mp4" type="video/mp4">
+</video>
+</body>
+<script>
+var camera = new THREE.PerspectiveCamera(75, 640/360, 1, 10000);
+camera.position.z = 0;
+
+var scene = new THREE.Scene();
+
+var canvas  = document.createElement('canvas');
+canvas.width = 640;
+canvas.height = 360;
+
+var texture = new THREE.Texture(canvas);
+
+texture.magFilter = THREE.LinearFilter;
+texture.minFilter = THREE.LinearFilter;
+texture.format = THREE.RGBFormat;
+
+var vertShader = document.getElementById('vertexShader').innerHTML;
+var fragShader = document.getElementById('fragmentShader').innerHTML;
+
+var material = new THREE.ShaderMaterial({
+  uniforms: {
+    video: {
+      type: 't',
+      value: texture
+    },
+    barrel_power: {
+      type: 'f',
+      value: 1.5
+    }
+  },
+  vertexShader: vertShader,
+  fragmentShader: fragShader,
+  wireframe: false
+});
+
+
+var leftPlane  = new THREE.PlaneGeometry(640, 360, 4, 4);
+var rightPlane = new THREE.PlaneGeometry(640, 360, 4, 4);
+
+var leftMesh   = new THREE.Mesh(leftPlane, material);
+var rightMesh   = new THREE.Mesh(rightPlane, material);
+
+scene.add(leftMesh);
+scene.add(rightMesh);
+
+var renderer = new THREE.WebGLRenderer();
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(1280, 720);
+document.body.appendChild(renderer.domElement);
+
+var video = document.getElementById('video');
+var ctx = canvas.getContext('2d');
+
+function render() {
+ texture.needsUpdate = true;
+ ctx.drawImage(video, 0, 0, 640, 360);
+ renderer.render(scene, camera);
+ requestAnimationFrame(render);
+}
+
+video.addEventListener('play', function() {
+  render();
+});
+</script>
+</html>

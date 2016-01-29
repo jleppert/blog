@@ -1,0 +1,98 @@
+<html>
+<head>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jsmpeg/0.1/jsmpg.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r73/three.min.js"></script>
+  <script id="vertexShader" type="x-shader/x-vertex">
+    varying vec2 v_pos;
+
+    void main() {
+      v_pos = vec2(position.xy);
+      gl_Position = vec4(position, 1.0);
+      gl_PointSize = 1.0;
+    }
+  </script>
+  <script id="fragmentShader" type="x-shader/x-fragment">
+    precision highp float;
+    uniform float barrel_power;
+    vec2 distort(vec2 p) {
+      float theta  = atan(p.y, p.x);
+      float radius = length(p);
+      radius = pow(radius, barrel_power);
+      p.x = radius * cos(theta);
+      p.y = radius * sin(theta);
+      return 0.5 * (p + 1.0);
+    }
+    varying vec2 v_pos;
+    uniform sampler2D video;
+    void main() {
+      vec2 d = distort(v_pos);
+      if (d.x > 1.0 || d.x < 0.0 || d.y > 1.0 || d.y < 0.0) {
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+      } else {
+        gl_FragColor = texture2D(video, d);
+      }
+    }
+  </script>
+  <style>
+    body {
+      margin: 0px;
+      padding: 0px;
+    }
+  </style>
+</head>
+<body></body>
+<script>
+var camera = new THREE.PerspectiveCamera(75, 240/160, 1, 10000);
+camera.position.z = 240;
+
+var scene = new THREE.Scene();
+
+var client  = new WebSocket('ws://127.0.0.1:9990');
+var canvas  = document.createElement('canvas');
+canvas.width = 240;
+canvas.height = 160;
+
+var player = new jsmpeg(client, { canvas: canvas });
+var texture = new THREE.Texture(canvas);
+
+texture.magFilter = THREE.LinearFilter;
+texture.minFilter = THREE.LinearFilter;
+texture.format = THREE.RGBFormat;
+
+var vertShader = document.getElementById('vertexShader').innerHTML;
+var fragShader = document.getElementById('fragmentShader').innerHTML;
+
+var material = new THREE.ShaderMaterial({
+  uniforms: {
+    video: {
+      type: 't',
+      value: texture
+    },
+    barrel_power: {
+      type: 'f',
+      value: 1.5
+    }
+  },
+  vertexShader: vertShader,
+  fragmentShader: fragShader,
+  wireframe: false
+});
+
+var plane  = new THREE.PlaneGeometry(240, 160, 4, 4);
+var mesh   = new THREE.Mesh(plane, material);
+
+scene.add(mesh);
+
+var renderer = new THREE.WebGLRenderer();
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(240, 160);
+document.body.appendChild(renderer.domElement);
+
+function render() {
+ texture.needsUpdate = true;
+ renderer.render(scene, camera);
+ requestAnimationFrame(render);
+}
+render();
+</script>
+</html>

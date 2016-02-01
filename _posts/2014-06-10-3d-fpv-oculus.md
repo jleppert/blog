@@ -18,7 +18,7 @@ and the Oculus Rift. I had a spare devkit I ordered awhile ago of the DK1, so I 
 trying to go for a pure javascript approach. I only had 3 days, so I wasn't able to arrive at a perfect solution
 but it did work.
 
-## The Hack
+##The Hack
 
 I needed this hack to be on the cheap, and since stereo cameras are expensive I had to find a way to make
 my own, using two cheap chinese IP cameras I had laying around. The idea is to run the cameras via the datalink on the drone
@@ -39,7 +39,7 @@ due to the optics in the rift (what give the immersive feeling).
 	<figcaption>Cheap cameras and their cheap mount</figcaption>
 </figure>
 
-## RTSP In The Browser
+##RTSP In The Browser
 
 After hearing about a cool pure javascript mpeg decoder called jsmpeg, I wanted to try to do all the video processing in the browser. This meant somehow getting the video to the browser from the RTSP stream offered by the cameras. Unfortunately, although RTSP is a standard transport for video streaming and supports several standard video formats, it’s not possible to natively use in the browser without some kind of plugin, typically flash.
 
@@ -83,7 +83,7 @@ texture.minFilter = THREE.LinearFilter;
 texture.format = THREE.RGBFormat;
 {% endhighlight %}
 
-## Ready for VR: Lens Distortion
+##Ready for VR: Lens Distortion
 
 <figure class="half">
 	<img src="/images/barrel.png" title="barrel distortion">
@@ -231,9 +231,10 @@ I've also used a [more complete rift shader](https://github.com/evanw/oculus-rif
 
 ## Test Flight
 
-How well did it work in flight? Well, a limitation was our flight controller uses the same datalink to send telemetry data over and I saturated that link pretty quickly with my video. So I didn't
-actually get to live out my dream of fully immersive realtime first person stereoscopic vision (say that 10 times fast!). But, it was a cool project and just goes to show what is possible
-to do in javascript these days. Additionally, mpeg1 is bandwidth-intensive and probably could stand to use a more efficient (and hardware supported/native) codec.
+I mounted my camera rig on a gimbal and was able to do a few test flights before going for a fly at Treasure Island. The link drops out in some places, but overall worked well. The effect was certainly immersive and has given me the motivation to continue to work on the project. Here's a rather compressed video of the flight:
+
+<iframe src="https://player.vimeo.com/video/153835562" width="500" height="304" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+<p><a href="https://vimeo.com/153835562">fpv</a> from <a href="https://vimeo.com/jleppert">Johnathan Leppert</a> on <a href="https://vimeo.com">Vimeo</a>.</p>
 
 I have plans to use a board like [Nvidia's Jetson](http://elinux.org/Jetson_TK1) and run the necessary code directly on the GPU, on the drone itself and send back a composite stream suitable for viewing directly in a headset, possibly using USB 3.0 high speed
 cameras, or using the built-in MIPI camera interface, which allows direct frame access on the GPU.

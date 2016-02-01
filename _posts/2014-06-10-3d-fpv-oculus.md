@@ -231,10 +231,9 @@ I've also used a [more complete rift shader](https://github.com/evanw/oculus-rif
 
 ##Test Flight
 
-I mounted my camera rig on a gimbal and was able to do a few test flights before going for a fly on treasure island. The link drops out in some places, but overall worked well. The effect was certainly immersive and has given me the motivation to continue to work on the project. Here's a rather compressed video of the flight:
-
-<iframe src="https://player.vimeo.com/video/153835562" width="500" height="304" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-<p><a href="https://vimeo.com/153835562">fpv</a> from <a href="https://vimeo.com/jleppert">Johnathan Leppert</a> on <a href="https://vimeo.com">Vimeo</a>.</p>
+How well did it work in flight? Well, a limitation was our flight controller uses the same datalink to send telemetry data over and I saturated that link pretty quickly with my video. So I didn't
+actually get to live out my dream of fully immersive realtime first person stereoscopic vision (say that 10 times fast!). But, it was a cool project and just goes to show what is possible
+to do in javascript these days. Additionally, mpeg1 is bandwidth-intensive and probably could stand to use a more efficient (and hardware supported/native) codec.
 
 I have plans to use a board like [Nvidia's Jetson](http://elinux.org/Jetson_TK1) and run the necessary code directly on the GPU, on the drone itself and send back a composite stream suitable for viewing directly in a headset, possibly using USB 3.0 high speed
 cameras, or using the built-in MIPI camera interface, which allows direct frame access on the GPU.

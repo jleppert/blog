@@ -18,7 +18,7 @@ and the Oculus Rift. I had a spare devkit I ordered awhile ago of the DK1, so I 
 trying to go for a pure javascript approach. I only had 3 days, so I wasn't able to arrive at a perfect solution
 but it did work.
 
-##The Hack
+## The Hack
 
 I needed this hack to be on the cheap, and since stereo cameras are expensive I had to find a way to make
 my own, using two cheap chinese IP cameras I had laying around. The idea is to run the cameras via the datalink on the drone
@@ -39,7 +39,7 @@ due to the optics in the rift (what give the immersive feeling).
 	<figcaption>Cheap cameras and their cheap mount</figcaption>
 </figure>
 
-##RTSP In The Browser
+## RTSP In The Browser
 
 After hearing about a cool pure javascript mpeg decoder called jsmpeg, I wanted to try to do all the video processing in the browser. This meant somehow getting the video to the browser from the RTSP stream offered by the cameras. Unfortunately, although RTSP is a standard transport for video streaming and supports several standard video formats, it’s not possible to natively use in the browser without some kind of plugin, typically flash.
 
@@ -83,7 +83,7 @@ texture.minFilter = THREE.LinearFilter;
 texture.format = THREE.RGBFormat;
 {% endhighlight %}
 
-##Ready for VR: Lens Distortion
+## Ready for VR: Lens Distortion
 
 <figure class="half">
 	<img src="/images/barrel.png" title="barrel distortion">

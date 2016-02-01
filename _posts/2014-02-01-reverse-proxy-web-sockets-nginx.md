@@ -14,7 +14,7 @@ If you’re using nginx, you won’t be able to proxy web socket connections usi
 
 Let’s get a simple web socket proxy up and running. Download nginx sources and tcp_proxy module:
 
-##Compile Nginx with tcp_proxy module
+## Compile Nginx with tcp_proxy module
 
 {% highlight bash %}
 export NGINX_VERSION=1.0.4
@@ -27,7 +27,7 @@ patch -p1 < ../nginx_tcp_proxy_module/tcp.patch
 sudo make && make install
 {% endhighlight %}
 
-##Proxy Configuration
+## Proxy Configuration
 
 Create a simple vhost like the following (note tcp must be defined at the server directive level):
 
@@ -69,7 +69,7 @@ You’ll notice there is an additional http section, with a check_status directi
 	<img src="/images/down.png"/>
 </figure>
 
-##Create a Simple Websocket Server
+## Create a Simple Websocket Server
 
 {% highlight js %}
 var http = require('http'), io = require('socket.io');
@@ -106,7 +106,7 @@ You should now check your status page to verify all backends are up and running:
 
 You can also go to our proxy via standard http (web browser) and correctly see “Hello World” to verify we’re hitting one of our node backends.
 
-##Test Websocket Proxying
+## Test Websocket Proxying
 
 Now lets create a simple web socket client to test if we can actually create a websocket connection over the proxy:
 

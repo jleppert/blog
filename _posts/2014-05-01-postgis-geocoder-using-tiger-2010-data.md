@@ -8,7 +8,7 @@ oldurl: /postgis-geocoder-using-tiger-2010-data
 
 What happens when you have half a million addresses and need to find out where in the world they actually are? You geocode them! Which isn’t the easiest thing to do — the difficulty increasing as your need for performance, quality and quantity goes up.
 
-##Geocoding Options
+## Geocoding Options
 
 The first, and probably the most obvious, is to simply use an external service. There are plenty to choose from, with many major companies offering up their Geocoder API for your personal enjoyment (or dis-enjoyment). So pick your poison — Google, Yahoo, Bing all have nice API’s that will happily take an address and give you something that looks like a lat and long.
 
@@ -21,11 +21,11 @@ With these facts of life in mind, I decided what any crazy person would — setu
 Fortunately, PostGIS has in it’s latest version, buried under extras a [quite comprehensive geocoder project](http://postgis.refractions.net/documentation/manual-svn/Extras.html#Tiger_Geocoder) based upon freely available [US Census Shapefile data](http://www.census.gov/geo/www/tiger/). I’ll walk you through setting up your own geocoder, complete with soundex support and ability to bulk geocode from a db table.
 
 
-##Postgres Setup
+## Postgres Setup
 
 *If you already have Postgres setup, you can skip or skim over these steps. Just make sure you have a working installation and now the paths to all the relevant bits where things are installed*
 
-###Download & Install Postgres
+### Download & Install Postgres
 
 For maximum flexibility in the initial prototypying, I decided to compile Postgres from source, but most distributions also have a package available and Postgres maintains binary and graphical installer packages for some. To compile:
 
@@ -82,7 +82,7 @@ postgres=#
 
 To quit, type “\q”. Now we’re ready to install and setup PostGIS!
 
-##Setup PostGIS
+## Setup PostGIS
 
 *You’ll need libxml2-dev, libgeos-dev and libproj-dev (xslt and convert are also needed for documentation).* 
 I had to manually compile and install geos (which you can get from [osgeo](http://trac.osgeo.org/geos/)).
@@ -98,7 +98,7 @@ make install
 ldconfig
 {% endhighlight %}
 
-###Create a spatial database template
+### Create a spatial database template
 
 So we can easily create spatially enabled databases, we’ll create one as a template and apply the spatial data types to it:
 
@@ -116,7 +116,7 @@ Now to create a new postgis enabled spatial database, we just do the following:
 /usr/local/pgsql/bin/createdb -T spatial_db_template tiger
 {% endhighlight %}
 
-###Add soundex ability
+### Add soundex ability
 
 To add soundex ability to the db (used in matching parsed address parts which includes soundex, metaphone and levenshtein abilities), first build the module under the contrib directory of your postgres source:
 
@@ -132,7 +132,7 @@ This will add the fuzzystrmatch under the contrib folder of your installation. T
 /usr/local/pgsql/bin/psql -d tiger -f /usr/local/pgsql/share/contrib/fuzzystrmatch.sql
 {% endhighlight %}
 
-###Create a geocoder database
+### Create a geocoder database
 
 Now, we’ll need to create a new geocoder database:
 
@@ -229,7 +229,7 @@ addid | address | lon | lat | new_address | rating
 2 | 77 Massachusetts Avenue, Cambridge, MA 02139 | -71.09436 | 42.35981 | 77 Massachusetts Ave, Cambridge, MA 02139 | 0
 {% endhighlight %}
 
-##Performance Considerations
+## Performance Considerations
 
 What’s it like to use it for real life stuff? Well, your mileage may vary. I loaded all US States and performance ranged anywhere from 40 ms to over 3000 ms for some difficult addresses on a dual quad core machine with 32 GB of ram and fast disks. Part of the complexity is in the address parsing and attempting to match address parts to many tables, resulting in table scans and a lot of time and disk complexity. If you have many millions of addresses to geocode, this could be a problem.
 

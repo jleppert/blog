@@ -29,10 +29,10 @@ owner:
 background:
 
 # Analytics and webmaster tools stuff goes here
-google_analytics:
-google_verify:
+google_analytics: UA-73243326-1
+google_verify: vzRgZ7N5QtKhyg9y3QOlBs892jzUnYdiqiAD_cAgz5k
 # https://ssl.bing.com/webmaster/configure/verify/ownership Option 2 content= goes here
-bing_verify:
+bing_verify: D2CA3EF1FE5780B63A47B9C79CA481A7
 
 # http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 timezone:    America/New_York

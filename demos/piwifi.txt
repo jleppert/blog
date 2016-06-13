@@ -1,0 +1,10 @@
+mkdir ~/src/drivers
+cd ~/src/drivers/
+git clone https://github.com/lwfinger/rtl8188eu.git
+sudo wget https://raw.githubusercontent.com/notro/rpi-source/master/rpi-source -O /usr/local/bin/rpi-source && sudo chmod +x /usr/local/bin/rpi-source && /usr/local/bin/rpi-source -q --tag-update
+sudo rpi-source
+sudo rpi-source --skip-gcc
+cd ~/src/drivers/rtl8188eu
+sudo make all
+sudo make install
+
